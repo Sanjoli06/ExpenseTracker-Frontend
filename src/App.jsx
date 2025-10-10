@@ -4,6 +4,7 @@ import AuthPage from "./pages/auth/AuthPage";
 import ProtectedRoute from "./components/protectedRoutes/ProtectedRoute";
 import HomePage from "./pages/home/HomePage";
 import Navbar from "./components/Common/Navbar";
+import ViewAllEntriesPage from "./pages/Entries/ViewAllEntriesPage";
 
 
 function App() {
@@ -27,6 +28,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+         <Route
+          path="/view-all-entries"
+          element={
+            <ProtectedRoute>
+              <ViewAllEntriesPage/>
+            </ProtectedRoute>
+          }
+        />
+        
+        
         {/* You can add /summary, /stats, /profile, /forgot-password routes here */}
       </Routes>
     </>
