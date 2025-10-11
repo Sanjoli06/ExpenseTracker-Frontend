@@ -190,7 +190,7 @@ export default function EntryListCard({
       </List>
 
       {/* View All */}
-      {entries.length > 5 && (
+      { (
         <Box
           sx={{
             p: 2,

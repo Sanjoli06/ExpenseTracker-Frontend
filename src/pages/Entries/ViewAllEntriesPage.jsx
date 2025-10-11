@@ -25,11 +25,15 @@ import SummaryCard from "../home/SummaryCard";
 import AddEntryModal from "../Entries/AddEntryModal";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import { deleteEntry, getEntries } from "../../utils/services/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ViewAllEntriesPage() {
   const navigate = useNavigate();
   const [entries, setEntries] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => {
     fetchEntries();
@@ -38,45 +42,35 @@ export default function ViewAllEntriesPage() {
   const fetchEntries = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/entries", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await getEntries();
       setEntries(res.data || []);
     } catch (err) {
-      console.error(
-        "Failed to fetch entries:",
-        err.response?.data || err.message
-      );
+      console.error("Failed to fetch entries:", err.response?.data || err.message);
       setEntries([]);
+      toast.error("Failed to fetch entries!");
     }
   };
 
   const incomes = entries.filter((e) => e.type === "income");
   const expenses = entries.filter((e) => e.type === "expense");
 
-  const totalIncome = incomes.reduce(
-    (sum, i) => sum + Number(i.amount || 0),
-    0
-  );
-  const totalExpense = expenses.reduce(
-    (sum, e) => sum + Number(e.amount || 0),
-    0
-  );
+  const totalIncome = incomes.reduce((sum, i) => sum + Number(i.amount || 0), 0);
+  const totalExpense = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
   const balance = totalIncome - totalExpense;
 
-  const handleEdit = (id) => {
-    navigate(`/edit-entry/${id}`);
+  const handleEdit = (entry) => {
+    setEditingEntry(entry);
+    setOpenModal(true);
   };
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/entries/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await deleteEntry(id);
       setEntries(entries.filter((e) => e._id !== id));
+      toast.success("Entry deleted successfully!");
     } catch (err) {
       console.error("Delete failed:", err);
+      toast.error("Failed to delete entry!");
     }
   };
 
@@ -90,6 +84,18 @@ export default function ViewAllEntriesPage() {
         background: "#f8fafc",
       }}
     >
+      {/* Toast container for notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
+
       <Container sx={{ flexGrow: 1, mt: 3 }}>
         {/* Summary Cards */}
         <Grid container spacing={2}>
@@ -136,7 +142,6 @@ export default function ViewAllEntriesPage() {
               gap: 2,
             }}
           >
-            {/* Filter Buttons */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button variant="outlined" size="large" color="primary">
                 All
@@ -149,7 +154,6 @@ export default function ViewAllEntriesPage() {
               </Button>
             </Box>
 
-            {/* Right Side Controls */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button
                 variant="contained"
@@ -198,11 +202,10 @@ export default function ViewAllEntriesPage() {
                         borderRadius: 2,
                         backgroundColor: "#ffffff",
                         borderTop: `5px solid ${
-                          entry.type === "income" ? "#4caf50" : "#f44336"
+                          entry.type === "income" ? "#55a558ff" : "#da8e89ff"
                         }`,
                         minHeight: "180px",
-                        height: "70%",
-                        width: "330px",
+                        width: "335px",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "space-between",
@@ -217,7 +220,6 @@ export default function ViewAllEntriesPage() {
                             mb: 1,
                           }}
                         >
-                          {/* Arrow inside colored box */}
                           <Box
                             sx={{
                               display: "flex",
@@ -227,22 +229,19 @@ export default function ViewAllEntriesPage() {
                               height: 36,
                               borderRadius: "6px",
                               backgroundColor:
-                                entry.type === "income" ? "#4caf50" : "#f44336",
+                                entry.type === "income"
+                                  ? "rgba(76,175,80,0.12)"
+                                  : "rgba(244,67,54,0.12)",
                               mr: 1,
                             }}
                           >
                             {entry.type === "income" ? (
-                              <ArrowUpwardIcon
-                                sx={{ color: "#fff", fontSize: 30 }}
-                              />
+                              <ArrowUpwardIcon sx={{ color: "#2e7d32", fontSize: 30 }} />
                             ) : (
-                              <ArrowDownwardIcon
-                                sx={{ color: "#fff", fontSize: 30 }}
-                              />
+                              <ArrowDownwardIcon sx={{ color: "#c62828", fontSize: 30 }} />
                             )}
                           </Box>
 
-                          {/* Title and amount container */}
                           <Box
                             sx={{
                               flexGrow: 1,
@@ -253,17 +252,15 @@ export default function ViewAllEntriesPage() {
                           >
                             <Typography
                               variant="subtitle1"
-                              sx={{ fontWeight: "bold", color: "#333" , fontSize: "1.2rem"}}
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#333",
+                                fontSize: "1.2rem",
+                              }}
                               noWrap
-                              title={
-                                entry.title ||
-                                (entry.type === "income" ? "Income" : "Expense")
-                              }
+                              title={entry.title}
                             >
-                              {entry.title ||
-                                (entry.type === "income"
-                                  ? "Income"
-                                  : "Expense")}
+                              {entry.title}
                             </Typography>
 
                             <Typography
@@ -272,8 +269,8 @@ export default function ViewAllEntriesPage() {
                                 fontWeight: 700,
                                 color:
                                   entry.type === "income"
-                                    ? "#4caf50"
-                                    : "#f44336",
+                                    ? "green"
+                                    : "error.main",
                                 ml: 2,
                               }}
                             >
@@ -283,19 +280,32 @@ export default function ViewAllEntriesPage() {
                           </Box>
                         </Box>
 
-                        {entry.category && (
+                        <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                          <Chip
+                            label={entry.category}
+                            size="small"
+                            sx={{
+                              fontSize: "0.75rem",
+                              fontWeight: 600,
+                              borderRadius: "6px",
+                              color:
+                                entry.type === "income" ? "#2e7d32" : "#c62828",
+                              backgroundColor:
+                                entry.type === "income"
+                                  ? "rgba(76,175,80,0.15)"
+                                  : "rgba(244,67,54,0.15)",
+                            }}
+                          />
                           <Typography
-                            variant="body2"
-                            sx={{ mt: 1, fontStyle: "italic", color: "#555" }}
+                            variant="caption"
+                            color="textSecondary"
+                            sx={{ fontSize: "0.8rem" }}
                           >
-                            {entry.category}
+                            {new Date(entry.date).toLocaleDateString()}
                           </Typography>
-                        )}
+                        </Box>
 
-                        <Typography
-                          variant="body2"
-                          sx={{ mt: 1, color: "#777" }}
-                        >
+                        <Typography variant="body2" sx={{ mt: 1, color: "#777" }}>
                           {entry.description || ""}
                         </Typography>
                       </Box>
@@ -317,7 +327,7 @@ export default function ViewAllEntriesPage() {
                               <IconButton
                                 size="small"
                                 color="primary"
-                                onClick={() => handleEdit(entry._id)}
+                                onClick={() => handleEdit(entry)}
                               >
                                 <EditIcon fontSize="small" />
                               </IconButton>
@@ -381,11 +391,18 @@ export default function ViewAllEntriesPage() {
         </motion.div>
       </Tooltip>
 
-      {/* Add Entry Modal */}
+      {/* Add/Edit Entry Modal */}
       <AddEntryModal
         open={openModal}
-        handleClose={() => setOpenModal(false)}
-        onAdded={fetchEntries}
+        handleClose={() => {
+          setOpenModal(false);
+          setEditingEntry(null);
+        }}
+        onAdded={() => {
+          fetchEntries();
+          toast.success(editingEntry ? "Entry updated!" : "Entry added!");
+        }}
+        editingEntry={editingEntry}
       />
     </Box>
   );
