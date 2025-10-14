@@ -1,23 +1,34 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import AuthPage from "./pages/auth/AuthPage";
 import ProtectedRoute from "./components/protectedRoutes/ProtectedRoute";
 import HomePage from "./pages/home/HomePage";
 import Navbar from "./components/Common/Navbar";
 import ViewAllEntriesPage from "./pages/Entries/ViewAllEntriesPage";
-
+import NotFoundPage from "../src/pages/NotFound/NotFoundPage"; // ✅ make sure you created this
 
 function App() {
+  const token = localStorage.getItem("token");
+
   return (
     <>
       {/* Navbar will auto-hide on /login or /signup */}
-      <Navbar/>
+      <Navbar />
 
       <Routes>
-        {/* Auth page */}
-        <Route path="/" element={<AuthPage />} />
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/signup" element={<AuthPage />} />
+        {/* Auth pages — redirect if already logged in */}
+        <Route
+          path="/"
+          element={token ? <Navigate to="/home" /> : <AuthPage />}
+        />
+        <Route
+          path="/login"
+          element={token ? <Navigate to="/home" /> : <AuthPage />}
+        />
+        <Route
+          path="/signup"
+          element={token ? <Navigate to="/home" /> : <AuthPage />}
+        />
 
         {/* Protected pages */}
         <Route
@@ -28,17 +39,17 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/view-all-entries"
           element={
             <ProtectedRoute>
-              <ViewAllEntriesPage/>
+              <ViewAllEntriesPage />
             </ProtectedRoute>
           }
         />
-        
-        
-        {/* You can add /summary, /stats, /profile, /forgot-password routes here */}
+
+        {/* ✅ Not Found route */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );

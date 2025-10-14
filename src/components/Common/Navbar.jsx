@@ -28,8 +28,9 @@ function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const authPaths = ["/", "/login", "/signup", "/forgot-password"];
-  if (authPaths.includes(location.pathname)) return null;
+  const token = localStorage.getItem("token");
+  const authPaths = ["/", "/login", "/signup"];
+  if (authPaths.includes(location.pathname) || !token) return null;
 
   const handleProfileMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -39,7 +40,11 @@ function Navbar() {
     handleMenuClose();
     if (option === "logout") {
       localStorage.removeItem("token");
-      navigate("/login");
+      // Small timeout gives React a frame to unmount Navbar smoothly
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+        window.location.reload(); // ensures clean auth state reset
+      }, 100);
     } else if (option === "profile") {
       navigate("/profile");
     } else if (option === "forgot") {

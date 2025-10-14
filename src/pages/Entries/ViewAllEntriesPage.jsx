@@ -34,6 +34,8 @@ export default function ViewAllEntriesPage() {
   const [entries, setEntries] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("latest");
 
   useEffect(() => {
     fetchEntries();
@@ -41,22 +43,17 @@ export default function ViewAllEntriesPage() {
 
   const fetchEntries = async () => {
     try {
-      const token = localStorage.getItem("token");
       const res = await getEntries();
       setEntries(res.data || []);
     } catch (err) {
-      console.error("Failed to fetch entries:", err.response?.data || err.message);
+      console.error(
+        "Failed to fetch entries:",
+        err.response?.data || err.message
+      );
       setEntries([]);
       toast.error("Failed to fetch entries!");
     }
   };
-
-  const incomes = entries.filter((e) => e.type === "income");
-  const expenses = entries.filter((e) => e.type === "expense");
-
-  const totalIncome = incomes.reduce((sum, i) => sum + Number(i.amount || 0), 0);
-  const totalExpense = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-  const balance = totalIncome - totalExpense;
 
   const handleEdit = (entry) => {
     setEditingEntry(entry);
@@ -74,6 +71,35 @@ export default function ViewAllEntriesPage() {
     }
   };
 
+  // 🔹 Filter logic
+  const filteredEntries =
+    filter === "all"
+      ? entries
+      : entries.filter((entry) => entry.type === filter);
+
+  // 🔹 Sort logic
+  const sortedEntries = [...filteredEntries].sort((a, b) => {
+    if (sortOrder === "latest") {
+      return new Date(b.date) - new Date(a.date);
+    } else {
+      return new Date(a.date) - new Date(b.date);
+    }
+  });
+
+  // 🔹 Summary calculations
+  const incomes = entries.filter((e) => e.type === "income");
+  const expenses = entries.filter((e) => e.type === "expense");
+
+  const totalIncome = incomes.reduce(
+    (sum, i) => sum + Number(i.amount || 0),
+    0
+  );
+  const totalExpense = expenses.reduce(
+    (sum, e) => sum + Number(e.amount || 0),
+    0
+  );
+  const balance = totalIncome - totalExpense;
+
   return (
     <Box
       sx={{
@@ -84,17 +110,7 @@ export default function ViewAllEntriesPage() {
         background: "#f8fafc",
       }}
     >
-      {/* Toast container for notifications */}
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="colored"
-      />
+      <ToastContainer position="top-right" autoClose={2000} theme="colored" />
 
       <Container sx={{ flexGrow: 1, mt: 3 }}>
         {/* Summary Cards */}
@@ -131,7 +147,7 @@ export default function ViewAllEntriesPage() {
             All Entries
           </Typography>
 
-          {/* Filter and Controls */}
+          {/* Filter + Sort Controls */}
           <Box
             sx={{
               display: "flex",
@@ -142,18 +158,70 @@ export default function ViewAllEntriesPage() {
               gap: 2,
             }}
           >
+            {/* Filter Buttons */}
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Button variant="outlined" size="large" color="primary">
+              {/* All Button */}
+              <Button
+                variant="outlined"
+                size="large"
+                color="primary"
+                sx={{
+                  background:
+                    filter === "all"
+                      ? "linear-gradient(135deg, rgba(25,118,210,0.15), rgba(66,165,245,0.15))"
+                      : "transparent",
+                  color: "#1976d2",
+                  borderColor: "#1976d2",
+                  fontWeight: 600,
+                  textTransform: "none",
+                }}
+                onClick={() => setFilter("all")}
+              >
                 All
               </Button>
-              <Button variant="outlined" size="large" color="success">
+
+              {/* Income Button */}
+              <Button
+                variant="outlined"
+                size="large"
+                color="success"
+                sx={{
+                  background:
+                    filter === "income"
+                      ? "linear-gradient(135deg, rgba(76,175,80,0.15), rgba(129,199,132,0.15))"
+                      : "transparent",
+                  color: "#2e7d32",
+                  borderColor: "#2e7d32",
+                  fontWeight: 600,
+                  textTransform: "none",
+                }}
+                onClick={() => setFilter("income")}
+              >
                 Income
               </Button>
-              <Button variant="outlined" size="large" color="error">
+
+              {/* Expense Button */}
+              <Button
+                variant="outlined"
+                size="large"
+                color="error"
+                sx={{
+                  background:
+                    filter === "expense"
+                      ? "linear-gradient(135deg, rgba(229,57,53,0.15), rgba(244,67,54,0.15))"
+                      : "transparent",
+                  color: "#c62828",
+                  borderColor: "#c62828",
+                  fontWeight: 600,
+                  textTransform: "none",
+                }}
+                onClick={() => setFilter("expense")}
+              >
                 Expenses
               </Button>
             </Box>
 
+            {/* Sort + Download */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button
                 variant="contained"
@@ -170,6 +238,8 @@ export default function ViewAllEntriesPage() {
               </Button>
 
               <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
                 style={{
                   padding: "12px 16px",
                   fontSize: "16px",
@@ -177,18 +247,19 @@ export default function ViewAllEntriesPage() {
                   border: "1px solid #ccc",
                   outline: "none",
                   height: "48px",
+                  cursor: "pointer",
                 }}
               >
-                <option>Sort by Date - Latest</option>
-                <option>Sort by Date - Oldest</option>
+                <option value="latest">Sort by Date - Latest</option>
+                <option value="oldest">Sort by Date - Oldest</option>
               </select>
             </Box>
           </Box>
 
           {/* Entries Grid */}
           <Grid container spacing={3}>
-            {entries.length > 0 ? (
-              entries.map((entry, index) => (
+            {sortedEntries.length > 0 ? (
+              sortedEntries.map((entry, index) => (
                 <Grid item xs={12} sm={6} md={4} key={entry._id || index}>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -236,9 +307,13 @@ export default function ViewAllEntriesPage() {
                             }}
                           >
                             {entry.type === "income" ? (
-                              <ArrowUpwardIcon sx={{ color: "#2e7d32", fontSize: 30 }} />
+                              <ArrowUpwardIcon
+                                sx={{ color: "#2e7d32", fontSize: 30 }}
+                              />
                             ) : (
-                              <ArrowDownwardIcon sx={{ color: "#c62828", fontSize: 30 }} />
+                              <ArrowDownwardIcon
+                                sx={{ color: "#c62828", fontSize: 30 }}
+                              />
                             )}
                           </Box>
 
@@ -280,7 +355,12 @@ export default function ViewAllEntriesPage() {
                           </Box>
                         </Box>
 
-                        <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          gap={1}
+                          mt={0.5}
+                        >
                           <Chip
                             label={entry.category}
                             size="small"
@@ -305,7 +385,10 @@ export default function ViewAllEntriesPage() {
                           </Typography>
                         </Box>
 
-                        <Typography variant="body2" sx={{ mt: 1, color: "#777" }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ mt: 1, color: "#777" }}
+                        >
                           {entry.description || ""}
                         </Typography>
                       </Box>
