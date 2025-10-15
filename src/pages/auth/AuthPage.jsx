@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-function AuthPage() {
+function AuthPage({ onLogin }) { // ✅ accept onLogin callback from App.js
   const [isSignup, setIsSignup] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [errors, setErrors] = useState({});
@@ -87,9 +87,13 @@ function AuthPage() {
           email: form.email.trim(),
           password: form.password,
         });
+        
+        // ✅ store token and inform App.js
         localStorage.setItem("token", res.data.token);
+        if (onLogin) onLogin(res.data.token); // 🔑 tell App.js token changed
+
         navigate("/home");
-        return; // Exit early to avoid post-submit logic
+        return; // exit early to prevent any flicker
       }
     } catch (err) {
       if (err.response?.data?.field) {
@@ -144,7 +148,7 @@ function AuthPage() {
           animate="visible"
         >
           <motion.div variants={childVariants}>
-            <Typography component="h1" variant="h4" align="center" gutterBottom >
+            <Typography component="h1" variant="h4" align="center" gutterBottom>
               {isSignup ? "Sign Up" : "Login"}
             </Typography>
           </motion.div>
@@ -263,8 +267,7 @@ function AuthPage() {
               <Typography variant="body2" color="text.secondary">
                 {isSignup
                   ? "Already have an account?"
-                  : "Don't have an account?"
-                }
+                  : "Don't have an account?"}
               </Typography>
               <Button
                 onClick={toggleForm}

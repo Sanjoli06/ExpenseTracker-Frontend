@@ -1,36 +1,82 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import AuthPage from "./pages/auth/AuthPage";
 import ProtectedRoute from "./components/protectedRoutes/ProtectedRoute";
 import HomePage from "./pages/home/HomePage";
 import Navbar from "./components/Common/Navbar";
 import ViewAllEntriesPage from "./pages/Entries/ViewAllEntriesPage";
-import NotFoundPage from "../src/pages/NotFound/NotFoundPage"; // ✅ make sure you created this
+import NotFoundPage from "./pages/NotFound/NotFoundPage";
+import SummaryPage from "./pages/Summary/SummaryPage";
+import ProfilePage from "./pages/Profile/ProfilePage";
+import ForgotPasswordPage from "./pages/ForgotPassword/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ForgotPassword/ResetPasswordPage";
 
 function App() {
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  // 🧠 Keep token in sync with localStorage (login/logout)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setToken(localStorage.getItem("token"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // 🪄 Helper to update token on login/logout from Navbar/AuthPage
+  const handleTokenChange = (newToken) => {
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+    } else {
+      localStorage.removeItem("token");
+    }
+    setToken(newToken);
+  };
 
   return (
     <>
-      {/* Navbar will auto-hide on /login or /signup */}
-      <Navbar />
+      {/* Navbar hides itself on auth pages */}
+      <Navbar onLogout={() => handleTokenChange(null)} />
 
       <Routes>
-        {/* Auth pages — redirect if already logged in */}
+        {/* Auth Pages */}
         <Route
           path="/"
-          element={token ? <Navigate to="/home" /> : <AuthPage />}
+          element={
+            token ? (
+              <Navigate to="/home" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
         <Route
           path="/login"
-          element={token ? <Navigate to="/home" /> : <AuthPage />}
+          element={
+            token ? (
+              <Navigate to="/home" replace />
+            ) : (
+              <AuthPage onLogin={handleTokenChange} />
+            )
+          }
         />
         <Route
           path="/signup"
-          element={token ? <Navigate to="/home" /> : <AuthPage />}
+          element={
+            token ? (
+              <Navigate to="/home" replace />
+            ) : (
+              <AuthPage onLogin={handleTokenChange} />
+            )
+          }
         />
 
-        {/* Protected pages */}
+        {/* Protected Pages */}
         <Route
           path="/home"
           element={
@@ -47,8 +93,37 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/summary"
+          element={
+            <ProtectedRoute>
+              <SummaryPage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* ✅ Not Found route */}
+        <Route
+          path="/forgot-password"
+          element={
+            <ProtectedRoute>
+              <ForgotPasswordPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPasswordPage />}
+        />
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>

@@ -20,7 +20,7 @@ import { AccountCircle, Menu as MenuIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
-function Navbar() {
+function Navbar({onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -30,7 +30,7 @@ function Navbar() {
 
   const token = localStorage.getItem("token");
   const authPaths = ["/", "/login", "/signup"];
-  if (authPaths.includes(location.pathname) || !token) return null;
+  if (authPaths.includes(location.pathname)) return null;
 
   const handleProfileMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -40,11 +40,8 @@ function Navbar() {
     handleMenuClose();
     if (option === "logout") {
       localStorage.removeItem("token");
-      // Small timeout gives React a frame to unmount Navbar smoothly
-      setTimeout(() => {
-        navigate("/login", { replace: true });
-        window.location.reload(); // ensures clean auth state reset
-      }, 100);
+      if (onLogout) onLogout(null); // 🧩 tell App.js to update token state
+      navigate("/login", { replace: true });
     } else if (option === "profile") {
       navigate("/profile");
     } else if (option === "forgot") {
