@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { sendOtp, verifyOtp } from "../../utils/services/api";
 
 function ForgotPasswordPage() {
   const [step, setStep] = useState(1); // 1: email, 2: otp
@@ -31,7 +32,7 @@ function ForgotPasswordPage() {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+      const res = await sendOtp(email); 
       setMessage(res.data.message || "OTP sent successfully!");
       setStep(2); // move to OTP input
     } catch (err) {
@@ -49,7 +50,7 @@ function ForgotPasswordPage() {
   setMessage("");
 
   try {
-    const res = await axios.post("http://localhost:5000/api/auth/verify-otp", { email, otp });
+    const res = await verifyOtp(email, otp); 
     setMessage(res.data.message);
     
     // Navigate to Reset Password page with resetToken
@@ -73,7 +74,7 @@ function ForgotPasswordPage() {
       <Paper elevation={8} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 2 }}>
         <motion.div variants={containerVariants} initial="hidden" animate="visible">
           <Typography variant="h4" align="center" gutterBottom color="primary">
-            Forgot Password
+            Update Password
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

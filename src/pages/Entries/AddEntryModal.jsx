@@ -16,7 +16,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { createEntry } from "../../utils/services/api";
+import { createEntry, updateEntry } from "../../utils/services/api";
 
 export default function AddEntryModal({
   open,
@@ -94,13 +94,7 @@ export default function AddEntryModal({
       const token = localStorage.getItem("token");
 
       if (isEditMode) {
-        await axios.put(
-          `http://localhost:5000/api/entries/${editingEntry._id}`,
-          formData,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+       await updateEntry(editingEntry._id, formData);
       } else {
         await createEntry(formData);
       }

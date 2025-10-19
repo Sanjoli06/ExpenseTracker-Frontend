@@ -10,6 +10,7 @@ import axios from "axios";
 import SummaryCard from "./SummaryCard";
 import EntryListCard from "./EntryListCard";
 import AddEntryModal from "../Entries/AddEntryModal";
+import { getEntries } from "../../utils/services/api";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -25,9 +26,7 @@ export default function HomePage() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/entries", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await getEntries();
       setEntries(res.data || []);
     } catch (err) {
       console.error("Failed to fetch entries:", err);
@@ -91,6 +90,7 @@ export default function HomePage() {
               title="Available Balance"
               value={`₹${balance}`}
               bg="linear-gradient(135deg,#43a047,#66bb6a)"
+               
             />
           </Grid>
         </Grid>

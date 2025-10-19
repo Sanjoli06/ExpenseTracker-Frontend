@@ -15,6 +15,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { loginUser, signupUser } from "../../utils/services/api";
 
 function AuthPage({ onLogin }) { // ✅ accept onLogin callback from App.js
   const [isSignup, setIsSignup] = useState(false);
@@ -74,7 +75,7 @@ function AuthPage({ onLogin }) { // ✅ accept onLogin callback from App.js
 
     try {
       if (isSignup) {
-        await axios.post("http://localhost:5000/api/auth/signup", {
+        await signupUser({
           name: form.name.trim(),
           email: form.email.trim(),
           password: form.password,
@@ -83,7 +84,7 @@ function AuthPage({ onLogin }) { // ✅ accept onLogin callback from App.js
         setForm({ name: "", email: "", password: "", confirmPassword: "" });
         setIsSignup(false);
       } else {
-        const res = await axios.post("http://localhost:5000/api/auth/login", {
+        const res = await loginUser({
           email: form.email.trim(),
           password: form.password,
         });

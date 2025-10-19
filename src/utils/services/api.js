@@ -1,10 +1,45 @@
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://expensetracker-backend-8t6v.onrender.com/api";
 
 const getAuthHeader = () => {
   const token = localStorage.getItem("token");
   return { headers: { Authorization: `Bearer ${token}` } };
+};
+
+export const signupUser = async (data) => {
+  const res = await axios.post(`${API_BASE}/auth/signup`, data);
+  return res;
+};
+
+//  Login
+export const loginUser = async (data) => {
+  const res = await axios.post(`${API_BASE}/auth/login`, data);
+  return res;
+};
+
+// ✅ Get Logged-in User
+export const getUserProfile = async () => {
+  const res = await axios.get(`${API_BASE}/auth/me`, getAuthHeader());
+  return res;
+};
+
+// ✅ Forgot Password (send OTP)
+export const sendOtp = async (email) => {
+  const res = await axios.post(`${API_BASE}/auth/forgot-password`, { email });
+  return res;
+};
+
+// ✅ Verify OTP
+export const verifyOtp = async (email, otp) => {
+  const res = await axios.post(`${API_BASE}/auth/verify-otp`, { email, otp });
+  return res;
+};
+
+// ✅ Reset Password
+export const resetPassword = async (token, password) => {
+  const res = await axios.post(`${API_BASE}/auth/reset-password`, { token, password });
+  return res;
 };
 
 // ✅ Create entry

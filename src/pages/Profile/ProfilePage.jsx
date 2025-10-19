@@ -10,20 +10,35 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { getUserProfile } from "../../utils/services/api";
 
 function ProfilePage() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
-      if (token) {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUser(payload);
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const res = await getUserProfile();
+
+        if (res.data.success) {
+          setUser(res.data.user);
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      setUser(null);
-    }
+    };
+
+    fetchUser();
   }, []);
 
   const cardVariants = {
@@ -35,7 +50,7 @@ function ProfilePage() {
     },
   };
 
-  if (!user)
+  if (loading)
     return (
       <Box
         display="flex"
@@ -44,6 +59,15 @@ function ProfilePage() {
         height="70vh"
       >
         <CircularProgress color="primary" />
+      </Box>
+    );
+
+  if (!user)
+    return (
+      <Box textAlign="center" sx={{ mt: 8 }}>
+        <Typography variant="h6" color="text.secondary">
+          No user data available.
+        </Typography>
       </Box>
     );
 
@@ -77,18 +101,28 @@ function ProfilePage() {
             <Typography variant="subtitle1" fontWeight={600}>
               Account Details
             </Typography>
+
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              <strong>User ID:</strong> {user.id || "N/A"}
+              <strong>User ID:</strong> {user._id || "N/A"}
             </Typography>
+
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               <strong>Role:</strong> {user.role || "User"}
             </Typography>
+
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               <strong>Joined:</strong>{" "}
               {user.createdAt
                 ? new Date(user.createdAt).toLocaleDateString()
                 : "Unknown"}
             </Typography>
+
+            {user.updatedAt && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <strong>Last Updated:</strong>{" "}
+                {new Date(user.updatedAt).toLocaleDateString()}
+              </Typography>
+            )}
           </Box>
         </motion.div>
       </Paper>

@@ -16,6 +16,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import SummaryCard from "../home/SummaryCard";
+import { getEntries } from "../../utils/services/api";
 
 export default function SummaryPage() {
   const [loading, setLoading] = useState(true);
@@ -31,9 +32,7 @@ export default function SummaryPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/entries", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await getEntries();
       setEntries(res.data || []);
     } catch (err) {
       console.error("Error fetching entries:", err);

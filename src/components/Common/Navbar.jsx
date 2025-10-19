@@ -165,7 +165,7 @@ function Navbar({onLogout }) {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                ExpenseVault
+                ExpenseTracker
               </Typography>
             </Box>
           </motion.div>
@@ -274,7 +274,7 @@ function Navbar({onLogout }) {
                       },
                     }}
                   >
-                    Forgot Password
+                    Update Password
                   </MenuItem>
                   <MenuItem
                     onClick={() => handleMenuClick("profile")}

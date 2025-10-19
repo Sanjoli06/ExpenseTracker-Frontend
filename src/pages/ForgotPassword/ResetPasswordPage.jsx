@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { resetPassword } from "../../utils/services/api";
 
 function ResetPasswordPage() {
   const location = useLocation();
@@ -52,10 +53,7 @@ function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/reset-password", {
-        token: resetToken,
-        password,
-      });
+      const res = await resetPassword(resetToken, password);
       setMessage(res.data.message || "Password reset successful!");
       setTimeout(() => navigate("/login"), 2000); // redirect after 2s
     } catch (err) {

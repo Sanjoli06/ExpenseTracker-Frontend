@@ -36,7 +36,12 @@ export default function SummaryCard({ icon, title, value, bg }) {
       <Box>
         <Typography
           variant="body2"
-          sx={{ color: "text.secondary", fontWeight: 500, mb: 0.5 , fontSize: "0.95rem"}}
+          sx={{
+            color: "text.secondary",
+            fontWeight: 500,
+            mb: 0.5,
+            fontSize: "0.95rem",
+          }}
         >
           {title.toUpperCase()}
         </Typography>

@@ -15,10 +15,11 @@ import SummaryPage from "./pages/Summary/SummaryPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import ForgotPasswordPage from "./pages/ForgotPassword/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ForgotPassword/ResetPasswordPage";
+import { Slide, ToastContainer } from "react-toastify";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
-
+ 
   // 🧠 Keep token in sync with localStorage (login/logout)
   useEffect(() => {
     const handleStorageChange = () => {
@@ -126,6 +127,18 @@ function App() {
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+
+       <ToastContainer
+        position="top-right"              // position (top-right corner)
+        autoClose={3000}                  // 3 seconds
+        hideProgressBar={false}           // keep progress bar visible
+        newestOnTop={true}                // newest notification on top
+        closeOnClick                      // allows user to close manually
+        pauseOnHover                      // pauses timer when hovered
+        draggable                         // allows dragging
+        transition={Slide}                // ✅ smooth slide-in animation
+        theme="colored"                   // colored theme looks more modern
+      />
     </>
   );
 }

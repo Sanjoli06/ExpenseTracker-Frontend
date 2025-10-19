@@ -223,7 +223,7 @@ export default function ViewAllEntriesPage() {
 
             {/* Sort + Download */}
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Button
+              {/* <Button
                 variant="contained"
                 size="large"
                 sx={{
@@ -235,7 +235,7 @@ export default function ViewAllEntriesPage() {
                 }}
               >
                 Download Excel
-              </Button>
+              </Button> */}
 
               <select
                 value={sortOrder}
@@ -271,7 +271,10 @@ export default function ViewAllEntriesPage() {
                       sx={{
                         p: 2,
                         borderRadius: 2,
-                        backgroundColor: "#ffffff",
+                        background:
+                          entry.type === "income"
+                            ? "linear-gradient(180deg, #f1fbf5 0%, #ffffff 100%)"
+                            : "linear-gradient(180deg, #fff5f5 0%, #ffffff 100%)",
                         borderTop: `5px solid ${
                           entry.type === "income" ? "#55a558ff" : "#da8e89ff"
                         }`,
@@ -389,7 +392,7 @@ export default function ViewAllEntriesPage() {
                           variant="body2"
                           sx={{ mt: 1, color: "#777" }}
                         >
-                          {entry.description || ""}
+                          {entry.notes || ""}
                         </Typography>
                       </Box>
 
