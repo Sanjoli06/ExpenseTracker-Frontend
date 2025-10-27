@@ -51,8 +51,7 @@ function Navbar({onLogout }) {
 
   const links = [
     { name: "Home", path: "/home" },
-    { name: "Summary", path: "/summary" },
-    { name: "Stats", path: "/stats" },
+    { name: "Summary", path: "/summary" }
   ];
 
   const drawerVariants = {
