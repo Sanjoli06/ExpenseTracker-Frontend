@@ -61,4 +61,4 @@ export const deleteEntry = async (id) => {
 };
 
 // Update an existing entry
-export const updateEntry = (id, data) => API.put(`/entries/${id}`, data);
+export const updateEntry = async (id, data) => axios.put(`${API_BASE}/entries/${id}`,data,getAuthHeader());
