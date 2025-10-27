@@ -486,7 +486,7 @@ export default function ViewAllEntriesPage() {
         }}
         onAdded={() => {
           fetchEntries();
-          toast.success(editingEntry ? "Entry updated!" : "Entry added!");
+          // toast.success(editingEntry ? "Entry updated!" : "Entry added!");
         }}
         editingEntry={editingEntry}
       />
